@@ -14,9 +14,17 @@ const userSchema = new Schema({
         required:true,
         type:"string"
     },
-    phone:{
+    email:{
         required:true,
         type:"string"
+    },
+    confirmCode: {
+        required:true,
+        type:"string"
+    },
+    isConfirmed: {
+        default:false,
+        type:"boolean"
     }
 })
 
