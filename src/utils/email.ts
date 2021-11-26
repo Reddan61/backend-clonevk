@@ -30,7 +30,7 @@ export const sendEmail = ({
         code
     }:ISendMail) => (
         mailer.sendMail({
-            from:"clone-vk@ya.ru",
+            from:process.env.NODEMAILER_USER as string,
             to,
             subject,
             html: html(code)

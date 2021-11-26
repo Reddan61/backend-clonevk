@@ -18,6 +18,20 @@ const userSchema = new Schema({
         required:true,
         type:"string"
     },
+    birthday: {
+        day: {
+            required:true,
+            type:"string"
+        },
+        month: {
+            required:true,
+            type:"string"
+        },
+        year: {
+            required:true,
+            type:"string"
+        }
+    },
     confirmCode: {
         required:true,
         type:"string"

@@ -14,7 +14,7 @@ export default class AuthController {
         return errorHandler(req,res,UsersService.verify.bind(UsersService))
     }
 
-    static test(req:Request,res:Response) {
-        console.log(req.user)
+    static me(req:Request,res:Response) {
+        return errorHandler(req,res,UsersService.me.bind(UsersService))
     }
 }

@@ -5,9 +5,15 @@ import UserModel from "./user.schema"
 import { sendEmail } from "@/utils/email"
 
 export default class UsersService {
+    static async me(req:Request,res:Response) {
+        res.status(200).json({
+            message:"success"
+        })
+    }
+    
     static async register(req:Request,res:Response) {
         const form = req.body
-    
+
         if(await this.getUserByEmail(form.email)) {
             res.status(400).json({
                 message:"error",
@@ -28,6 +34,7 @@ export default class UsersService {
             surname:form.surname,
             password:newPassword,
             email:form.email,
+            birthday: form.birthday,
             confirmCode:generatedCode
         }
 
