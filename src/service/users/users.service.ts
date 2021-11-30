@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import crypto from "crypto-js"
 import jwt from "jsonwebtoken"
+import cloudinary from "@/utils/cloudinary"
 import UserModel from "./user.schema"
 import { sendEmail } from "@/utils/email"
 
@@ -101,6 +102,29 @@ export default class UsersService {
 
         res.status(200).json({
             message:"success"
+        })
+    }
+
+    static async avatarUpload(req:Request,res:Response) {
+        const imageBase64 = req.body.image 
+        const user = await UserModel.findById((req.user as { _id:any})._id).exec()
+        if(user.avatar.length) {
+            await cloudinary.api.delete_resources([user.avatar])
+        }
+
+        const uploadedResponse = await cloudinary.uploader.upload(imageBase64, {
+            folder:"clone-vk"
+        })
+       
+        await user.updateOne({
+            avatar: uploadedResponse.public_id
+        })
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                image_url: uploadedResponse.public_id
+            }
         })
     }
 

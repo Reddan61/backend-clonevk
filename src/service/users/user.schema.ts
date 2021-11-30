@@ -32,6 +32,10 @@ const userSchema = new Schema({
             type:"string"
         }
     },
+    avatar: {
+        default:"",
+        type:"string"
+    },
     confirmCode: {
         required:true,
         type:"string"

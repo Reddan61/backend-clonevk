@@ -4,7 +4,9 @@ import express from "express"
 import bodyParser from "body-parser"
 import http from "http"
 import passport from "passport"
-import authRouter from "./routes/auth.router"
+import authRouter from "@/routes/auth.router"
+import profileRouter from "@/routes/profile.router"
+import imagesRouter from "@/routes/images.router"
 import connectToDataBase from "./db/mongo"
 import LocalStrategy from "@/controllers/auth/guards/local"
 import JwtStrategy from "@/controllers/auth/guards/jwt"
@@ -12,8 +14,8 @@ import JwtStrategy from "@/controllers/auth/guards/jwt"
 const app = express()
 const server = http.createServer(app)
 
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: true,limit:"50mb"}))
+app.use(bodyParser.json({limit:"50mb"}))
 
 //Strategies
 passport.use("local",LocalStrategy)
@@ -22,6 +24,8 @@ app.use(passport.initialize());
 
 //routes
 app.use("/auth",authRouter)
+app.use("/profile",profileRouter)
+app.use("/images",imagesRouter)
 
 
 
