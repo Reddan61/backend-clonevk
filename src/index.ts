@@ -4,6 +4,7 @@ import express from "express"
 import bodyParser from "body-parser"
 import http from "http"
 import passport from "passport"
+import cors from "cors"
 import authRouter from "@/routes/auth.router"
 import profileRouter from "@/routes/profile.router"
 import imagesRouter from "@/routes/images.router"
@@ -14,6 +15,9 @@ import JwtStrategy from "@/controllers/auth/guards/jwt"
 const app = express()
 const server = http.createServer(app)
 
+app.use(cors({
+    origin: process.env.CLIENT_URL
+}))
 app.use(bodyParser.urlencoded({extended: true,limit:"50mb"}))
 app.use(bodyParser.json({limit:"50mb"}))
 

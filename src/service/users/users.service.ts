@@ -12,34 +12,89 @@ export default class UsersService {
         })
     }
     
-    static async register(req:Request,res:Response) {
+    static async preRegister(req:Request,res:Response) {
         const form = req.body
 
-        if(await this.getUserByEmail(form.email)) {
+        const newUser = {
+            firstName: form.firstName,
+            surname:form.surname,
+            birthday: form.birthday
+        }
+
+        const user = await UserModel.create(newUser)
+
+        res.status(201).json({
+            message:"success",
+            payload: {
+                user: {
+                    _id:user._id
+                }
+            }
+        })
+
+    }
+    
+    static async sendEmail(req:Request,res:Response) {
+        const body = req.body
+
+        const user = await this.getUserById(body._id)
+        
+        if(!user) {
             res.status(400).json({
                 message:"error",
                 payload: {
-                    errorMessage:"Пользователь с такой почтой существует!" 
+                    errorMessage:"Пользователя не существует!"
                 }
             })
             return
         }
 
-        const newPassword = crypto.AES.encrypt(form.password, process.env.SECRET_KEY as string).toString()
-        const generatedCode = String(Math.floor(Math.random() * ( 10000 - 1000) + 1000))
-        
-        await this.sendEmailToUser(form.email,generatedCode)
-
-        const newUser = {
-            firstName: form.firstName,
-            surname:form.surname,
-            password:newPassword,
-            email:form.email,
-            birthday: form.birthday,
-            confirmCode:generatedCode
+        if(await this.getUserByEmail(body.email)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь с такой почтой уже существует!"
+                }
+            })
+            return
         }
 
-        const user = await UserModel.create(newUser)
+        
+        const generatedCode = String(Math.floor(Math.random() * ( 10000 - 1000) + 1000))
+        
+        await user.updateOne({
+            email:body.email,
+            confirmCode:generatedCode
+        })
+
+        await this.sendEmailToUser(body.email,generatedCode)
+
+        res.status(201).json({
+            message:"success",
+            payload: {}
+        })
+    }
+
+    static async setFirstPassword(req:Request,res:Response) {
+        const body = req.body
+
+        const newPassword = crypto.AES.encrypt(body.password, process.env.SECRET_KEY as string).toString()
+        
+        const user = await this.getUserById(body._id)
+        
+        if(!user || user.password) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователя не существует!"
+                }
+            })
+            return
+        }
+
+        await user.updateOne({
+            password:newPassword
+        })
 
         res.status(201).json({
             message:"success",
@@ -54,12 +109,11 @@ export default class UsersService {
     static async login(req:Request,res:Response) {
         interface UserRequest {
             email:string,
+            _id:string,
             password:string
         }
-
-        const user = await this.getUserByEmail((req.user as UserRequest).email )
-
-        const token = jwt.sign({_id: user._id},process.env.SECRET_KEY as string,{ 
+        
+        const token = jwt.sign({_id: (req.user as UserRequest)._id},process.env.SECRET_KEY as string,{ 
             expiresIn: "1d" 
         })
 
@@ -138,7 +192,8 @@ export default class UsersService {
 
     static async getUserByEmail(email:string) {
         const result = await UserModel.findOne({
-            email
+            email,
+            isConfirmed:true
         }).exec()
 
         return result

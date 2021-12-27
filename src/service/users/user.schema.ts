@@ -11,11 +11,11 @@ const userSchema = new Schema({
         type:"string"
     },
     password:{
-        required:true,
+        required:false,
         type:"string"
     },
     email:{
-        required:true,
+        required:false,
         type:"string"
     },
     birthday: {
@@ -37,7 +37,7 @@ const userSchema = new Schema({
         type:"string"
     },
     confirmCode: {
-        required:true,
+        required:false,
         type:"string"
     },
     isConfirmed: {
