@@ -8,7 +8,10 @@ import { sendEmail } from "@/utils/email"
 export default class UsersService {
     static async me(req:Request,res:Response) {
         res.status(200).json({
-            message:"success"
+            message:"success",
+            payload: {
+                _id:req.user
+            }
         })
     }
     
@@ -177,7 +180,39 @@ export default class UsersService {
         res.status(200).json({
             message:"success",
             payload: {
-                image_url: uploadedResponse.public_id
+                public_id: uploadedResponse.public_id
+            }
+        })
+    }
+
+    static async getAvatar(req:Request,res:Response) {
+        const { id:userId } = req.params
+        if(!userId) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const user = await UserModel.findById(userId).exec()
+
+        if(!user) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                public_id: user.avatar
             }
         })
     }

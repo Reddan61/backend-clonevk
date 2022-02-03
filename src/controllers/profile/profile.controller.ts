@@ -6,4 +6,7 @@ export default class AuthController {
     static avatar(req:Request,res:Response) {
         return errorHandler(req,res,UsersService.avatarUpload.bind(UsersService))
     }
+    static getAvatar(req:Request,res:Response) {
+        return errorHandler(req,res,UsersService.getAvatar.bind(UsersService))
+    }
 }
