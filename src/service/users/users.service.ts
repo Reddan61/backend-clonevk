@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import crypto from "crypto-js"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 import cloudinary from "@/utils/cloudinary"
 import UserModel from "./user.schema"
 import { sendEmail } from "@/utils/email"
@@ -187,7 +188,7 @@ export default class UsersService {
 
     static async getAvatar(req:Request,res:Response) {
         const { id:userId } = req.params
-        if(!userId) {
+        if(!mongoose.Types.ObjectId.isValid(userId)) {
             res.status(400).json({
                 message:"error",
                 payload: {
@@ -213,6 +214,43 @@ export default class UsersService {
             message:"success",
             payload: {
                 public_id: user.avatar
+            }
+        })
+    }
+
+    static async getProfileInfo(req:Request,res:Response) {
+        const { id:userId } = req.params
+
+        if(!mongoose.Types.ObjectId.isValid(userId)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const user = await UserModel.findById(userId).exec()
+
+        if(!user) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                user: {
+                    firstName: user.firstName,
+                    surname: user.surname,
+                    birthday:user.birthday
+                }
             }
         })
     }

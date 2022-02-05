@@ -7,4 +7,6 @@ const router = express.Router()
 router.patch('/avatar',passport.authenticate('jwt', { session: false }),ProfileController.avatar)
 router.get('/avatar/:id',ProfileController.getAvatar)
 
+router.get('/info/:id',ProfileController.getProfileInfo)
+
 export default router
