@@ -12,4 +12,12 @@ export default class ImagesService {
             }
         })
     }
+
+    static async uploadImage(imageBase64:string) {
+        const uploadedResponse = await cloudinary.uploader.upload(imageBase64, {
+            folder:"clone-vk"
+        })
+
+        return uploadedResponse.public_id
+    }
 }

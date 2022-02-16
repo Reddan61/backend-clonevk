@@ -4,45 +4,45 @@ import { Schema, model} from "mongoose"
 const userSchema = new Schema({
     firstName: {
         required:true,
-        type:"string"
+        type:String
     },
     surname: {
         required:true,
-        type:"string"
+        type:String
     },
     password:{
         required:false,
-        type:"string"
+        type:String
     },
     email:{
         required:false,
-        type:"string"
+        type:String
     },
     birthday: {
         day: {
             required:true,
-            type:"string"
+            type:String
         },
         month: {
             required:true,
-            type:"string"
+            type:String
         },
         year: {
             required:true,
-            type:"string"
+            type:String
         }
     },
     avatar: {
         default:"",
-        type:"string"
+        type:String
     },
     confirmCode: {
         required:false,
-        type:"string"
+        type:String
     },
     isConfirmed: {
         default:false,
-        type:"boolean"
+        type:Boolean
     }
 })
 

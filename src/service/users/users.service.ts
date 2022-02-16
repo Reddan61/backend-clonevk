@@ -1,3 +1,4 @@
+import ImagesService from '@/service/images/images.service';
 import { Request, Response } from "express"
 import crypto from "crypto-js"
 import jwt from "jsonwebtoken"
@@ -170,18 +171,16 @@ export default class UsersService {
             await cloudinary.api.delete_resources([user.avatar])
         }
 
-        const uploadedResponse = await cloudinary.uploader.upload(imageBase64, {
-            folder:"clone-vk"
-        })
+        const public_id = await ImagesService.uploadImage(imageBase64)
        
         await user.updateOne({
-            avatar: uploadedResponse.public_id
+            avatar: public_id
         })
 
         res.status(200).json({
             message:"success",
             payload: {
-                public_id: uploadedResponse.public_id
+                public_id
             }
         })
     }
@@ -247,6 +246,7 @@ export default class UsersService {
             message:"success",
             payload: {
                 user: {
+                    _id:user._id,
                     firstName: user.firstName,
                     surname: user.surname,
                     birthday:user.birthday
