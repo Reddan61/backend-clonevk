@@ -6,6 +6,10 @@ const postSchema = new Schema({
         type: Schema.Types.ObjectId, 
         ref: 'User'
     },
+    authorId: {
+        type: Schema.Types.ObjectId, 
+        ref: 'User'
+    },
     text: {
         type: String,
         default:""
@@ -13,6 +17,10 @@ const postSchema = new Schema({
     imagesIds: {
         type: [String],
         default: ""
+    },
+    date: {
+        type:Date,
+        default: new Date()
     },
     likes: {
         type:Number,

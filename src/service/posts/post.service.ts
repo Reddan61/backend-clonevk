@@ -38,4 +38,38 @@ export default class PostsService {
             }
         })
     }
+
+    static async getUserPost(req:Request,res:Response) {
+        const { id:userId, page = 1 } = req.query
+
+        if(!userId || !Types.ObjectId.isValid(userId as string)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const pageSize = 10
+
+        const totalPosts = await PostModel.countDocuments({userId}).exec()
+
+        const totalPages = Math.ceil(totalPosts/pageSize)
+
+        const skip = (Number(page) - 1) * pageSize < 0 ? totalPages * pageSize : (Number(page) - 1) * pageSize
+            
+
+        const limit = pageSize
+
+        const posts = await PostModel.find({userId}).limit(limit).skip(skip).exec()
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                posts
+            }
+        })
+    }
 }
