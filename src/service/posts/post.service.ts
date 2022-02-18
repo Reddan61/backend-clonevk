@@ -26,22 +26,24 @@ export default class PostsService {
         
         }
         const post = await PostModel.create({
-            userId:body.userId,
+            author:body.userId,
             text:body.text,
             imagesIds: public_ids
         })
 
+        const newPost = await post.populate({path:"author",select:["_id","avatar","firstName","surname"]})
+
         res.status(200).json({
             message:"success",
             payload: {
-                post
+                post:newPost
             }
         })
     }
 
     static async getUserPost(req:Request,res:Response) {
-        const { id:userId, page = 1 } = req.query
-
+        const { userId, page = 1 } = req.query
+  
         if(!userId || !Types.ObjectId.isValid(userId as string)) {
             res.status(400).json({
                 message:"error",
@@ -63,8 +65,8 @@ export default class PostsService {
 
         const limit = pageSize
 
-        const posts = await PostModel.find({userId}).limit(limit).skip(skip).exec()
-
+        const posts = await PostModel.find({userId}).sort({createdAt: 'desc'}).populate({path:"author",select:["_id","avatar","firstName","surname"]}).limit(limit).skip(skip).exec()
+        
         res.status(200).json({
             message:"success",
             payload: {

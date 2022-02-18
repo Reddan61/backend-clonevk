@@ -2,11 +2,7 @@ import { Schema, model} from "mongoose"
 
 
 const postSchema = new Schema({
-    userId: {
-        type: Schema.Types.ObjectId, 
-        ref: 'User'
-    },
-    authorId: {
+    author: {
         type: Schema.Types.ObjectId, 
         ref: 'User'
     },
@@ -26,6 +22,6 @@ const postSchema = new Schema({
         type:Number,
         default: 0
     }
-})
+},{timestamps:true})
 
 export default model("Post", postSchema)
