@@ -9,4 +9,10 @@ export default class PostsController {
     static getUserPosts(req:Request,res:Response) {
         return errorHandler(req,res,PostsService.getUserPost.bind(PostsService))
     }
+    static isLiked(req:Request,res:Response) {
+        return errorHandler(req,res,PostsService.isLiked.bind(PostsService))
+    }
+    static setLike(req:Request,res:Response) {
+        return errorHandler(req,res,PostsService.setLike.bind(PostsService))
+    }
 }

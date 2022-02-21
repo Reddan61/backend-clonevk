@@ -67,10 +67,116 @@ export default class PostsService {
 
         const posts = await PostModel.find({userId}).sort({createdAt: 'desc'}).populate({path:"author",select:["_id","avatar","firstName","surname"]}).limit(limit).skip(skip).exec()
         
+
+
         res.status(200).json({
             message:"success",
             payload: {
+                pageSize,
+                totalPages,
                 posts
+            }
+        })
+    }
+
+    static async isLiked(req:Request,res:Response) {
+        const userId = req.user
+        const {
+            postId
+        } = req.query
+
+        if(!userId || !Types.ObjectId.isValid(userId as string) || !postId || !Types.ObjectId.isValid(postId as string)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь или пост не найден!"
+                }
+            })
+            return
+        }
+
+        const post = await PostModel.find({
+            _id:postId,
+            liked: {
+                $in:userId
+            }
+        }).exec()
+        
+        res.status(200).json({
+            message:"success",
+            payload: {
+                isLiked:+post.length
+            }
+        })
+    }
+
+    static async setLike(req:Request,res:Response) {
+        const _id = req.user
+        const { postId } = req.body
+        
+        if(!Types.ObjectId.isValid(postId as string)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пост не найден!"
+                }
+            })
+            return
+        }
+
+        const post = await PostModel.findById(postId).exec()
+        
+        if(!post) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пост не найден!"
+                }
+            })
+            return
+        }
+
+        const isLiked = await PostModel.where({
+            liked: {
+                $in:[_id]
+            }
+        })
+
+        let postResult
+        
+        if(isLiked.length) {
+            postResult = await PostModel.findOneAndUpdate({
+                _id:postId
+            },{
+                $inc : {
+                    likes:-1
+                },
+                $pull:{
+                    liked:_id
+                }
+            }, {
+                new:true
+            })
+        } else {
+            postResult = await PostModel.findOneAndUpdate({
+                _id:postId
+            },{
+                $inc : {
+                    likes:1
+                },
+                $push:{
+                    liked:_id
+                }
+            }, {
+                new:true
+            })
+        }
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                isLiked: isLiked.length ? false : true,
+                likes:postResult.likes
             }
         })
     }
