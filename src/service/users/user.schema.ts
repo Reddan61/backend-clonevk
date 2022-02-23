@@ -43,7 +43,13 @@ const userSchema = new Schema({
     isConfirmed: {
         default:false,
         type:Boolean
+    },
+    friends: {
+        type: [Schema.Types.ObjectId], 
+        ref: 'User'
     }
 })
+
+userSchema.index({firstName:'text',surname:'text'})
 
 export default model("User", userSchema)

@@ -156,6 +156,7 @@ export default class UsersService {
         }
 
         await user.updateOne({
+            confirmCode:"",
             isConfirmed:true
         })
 
@@ -254,6 +255,163 @@ export default class UsersService {
             }
         })
     }
+    static async getUsers(req:Request,res:Response) {
+        const { search = "",pageSize = 10, page = 1 } = req.query
+
+        const pageSizeNumber = Number(pageSize)
+        const optionSearch = {
+            $or: [
+                { firstName: { $regex: search, $options: 'i' } },
+                { surname: { $regex: search, $options: 'i' } }
+            ],
+            isConfirmed:true
+        }
+
+        const totalPosts = await UserModel.countDocuments(optionSearch).exec()
+
+        const totalPages = Math.ceil(totalPosts/pageSizeNumber)
+
+        const skip = (Number(page) - 1) * pageSizeNumber < 0 ? totalPages * pageSizeNumber : (Number(page) - 1) * pageSizeNumber
+            
+        const limit = pageSizeNumber
+
+        const users = await UserModel.find(optionSearch).limit(limit).skip(skip).select(["surname","firstName","avatar"]).exec()
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                users,
+                totalPages,
+                page
+            }
+        })
+    }
+
+    static async addToFriend(req:Request,res:Response) {
+        const userId = req.user
+        const body = req.body
+  
+        if(String(userId) === String(body.userId)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Нельзя добавить себя в друзья!"
+                }
+            })
+            return
+        }
+
+        if(!mongoose.Types.ObjectId.isValid(body.userId)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const user = await UserModel.findById(userId).exec()
+        const friend = await UserModel.findById(body.userId).exec()
+
+        if(!friend) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+    
+        await user.updateOne({
+            $pull: {
+                friends: friend._id
+            }
+        })
+        await friend.updateOne({
+            $pull: {
+                friends: user._id
+            }
+        })
+
+        await user.updateOne({
+            $push: {
+                friends: friend._id
+            }
+        })
+        await friend.updateOne({
+            $push: {
+                friends: user._id
+            }
+        })
+        
+        res.status(200).json({
+            message:"success",
+            payload: {
+            }
+        })
+    }
+
+    static async getFriends(req:Request,res:Response) {
+        const { userId, search = "",pageSize = 10, page = 1 } = req.query
+
+        if(!mongoose.Types.ObjectId.isValid(userId as any)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const user = await UserModel.findById(userId).exec()
+
+        if(!user) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const pageSizeNumber = Number(pageSize)
+
+        const optionSearch = {
+            _id: {
+                $in: user.friends
+            },
+            $or: [
+                { firstName: { $regex: search, $options: 'i' } },
+                { surname: { $regex: search, $options: 'i' } }
+            ],
+            isConfirmed:true
+        }
+
+        const totalPosts = await UserModel.countDocuments(optionSearch).exec()
+
+        const totalPages = Math.ceil(totalPosts/pageSizeNumber)
+
+        const skip = (Number(page) - 1) * pageSizeNumber < 0 ? totalPages * pageSizeNumber : (Number(page) - 1) * pageSizeNumber
+            
+        const limit = pageSizeNumber
+
+        const users = await UserModel.find(optionSearch).limit(limit).skip(skip).select(["surname","firstName","avatar"]).exec()
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                users,
+                totalPages,
+                page
+            }
+        })
+    }
+
+    
 
     static async sendEmailToUser(email:string,code:string) {
        return sendEmail({

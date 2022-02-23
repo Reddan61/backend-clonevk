@@ -9,6 +9,7 @@ import authRouter from "@/routes/auth.router"
 import profileRouter from "@/routes/profile.router"
 import imagesRouter from "@/routes/images.router"
 import postsRouter from "@/routes/posts.router"
+import usersRouter from "@/routes/users.router"
 import connectToDataBase from "./db/mongo"
 import LocalStrategy from "@/controllers/auth/guards/local"
 import JwtStrategy from "@/controllers/auth/guards/jwt"
@@ -32,6 +33,7 @@ app.use("/auth",authRouter)
 app.use("/profile",profileRouter)
 app.use("/images",imagesRouter)
 app.use("/posts",postsRouter)
+app.use("/users",usersRouter)
 
 
 

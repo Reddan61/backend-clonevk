@@ -56,7 +56,7 @@ export default class PostsService {
 
         const pageSize = 10
 
-        const totalPosts = await PostModel.countDocuments({userId}).exec()
+        const totalPosts = await PostModel.countDocuments({author:userId}).exec()
 
         const totalPages = Math.ceil(totalPosts/pageSize)
 
@@ -65,7 +65,7 @@ export default class PostsService {
 
         const limit = pageSize
 
-        const posts = await PostModel.find({userId}).sort({createdAt: 'desc'}).populate({path:"author",select:["_id","avatar","firstName","surname"]}).limit(limit).skip(skip).exec()
+        const posts = await PostModel.find({author:userId}).sort({createdAt: 'desc'}).populate({path:"author",select:["_id","avatar","firstName","surname"]}).limit(limit).skip(skip).exec()
         
 
 
