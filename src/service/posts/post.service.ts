@@ -67,8 +67,6 @@ export default class PostsService {
 
         const posts = await PostModel.find({author:userId}).sort({createdAt: 'desc'}).populate({path:"author",select:["_id","avatar","firstName","surname"]}).limit(limit).skip(skip).exec()
         
-
-
         res.status(200).json({
             message:"success",
             payload: {
@@ -105,7 +103,7 @@ export default class PostsService {
         res.status(200).json({
             message:"success",
             payload: {
-                isLiked:+post.length
+                isLiked:Boolean(post.length)
             }
         })
     }
@@ -136,7 +134,8 @@ export default class PostsService {
             return
         }
 
-        const isLiked = await PostModel.where({
+        const isLiked = await PostModel.find({
+            _id:postId,
             liked: {
                 $in:[_id]
             }

@@ -12,4 +12,10 @@ export default class UsersController {
     static addToFriend(req:Request,res:Response) {
         return errorHandler(req,res,UsersService.addToFriend.bind(UsersService))
     }
+    static isFriend(req:Request,res:Response) {
+        return errorHandler(req,res,UsersService.isFriend.bind(UsersService))
+    }
+    static deleteFriend(req:Request,res:Response) {
+        return errorHandler(req,res,UsersService.deleteFriend.bind(UsersService))
+    }
 }

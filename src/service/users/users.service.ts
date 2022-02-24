@@ -349,6 +349,53 @@ export default class UsersService {
         res.status(200).json({
             message:"success",
             payload: {
+                isFriend:true
+            }
+        })
+    }
+
+    static async deleteFriend(req:Request,res:Response) {
+        const userId = req.user
+        const body = req.body
+
+        if(!mongoose.Types.ObjectId.isValid(body.userId)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const user = await UserModel.findById(userId).exec()
+        const friend = await UserModel.findById(body.userId).exec()
+
+        if(!friend) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+    
+        await user.updateOne({
+            $pull: {
+                friends: friend._id
+            }
+        })
+        await friend.updateOne({
+            $pull: {
+                friends: user._id
+            }
+        })
+        
+        res.status(200).json({
+            message:"success",
+            payload: {
+                isFriend:false
             }
         })
     }
@@ -407,6 +454,42 @@ export default class UsersService {
                 users,
                 totalPages,
                 page
+            }
+        })
+    }
+
+    static async isFriend(req:Request,res:Response) {
+        const IdAuthUser = req.user
+        const { userId } = req.query
+
+        if(!mongoose.Types.ObjectId.isValid(userId as any)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const friend = await UserModel.findById(userId).exec()
+        const authUser = await UserModel.findById(IdAuthUser).exec()
+
+        if(!friend || !authUser) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+        const isFriend =  friend.friends.includes(authUser._id) && authUser.friends.includes(friend._id) 
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                isFriend
             }
         })
     }

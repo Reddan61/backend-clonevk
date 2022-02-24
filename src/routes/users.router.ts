@@ -8,7 +8,9 @@ const router = express.Router()
 
 router.get('/',validate,UsersController.getUsers)
 router.get('/friends',validate,UsersController.getFriends)
+router.delete('/friends',passport.authenticate('jwt', { session: false }),validate,UsersController.deleteFriend)
 router.patch('/friends',passport.authenticate('jwt', { session: false }),validate,UsersController.addToFriend)
+router.get('/isfriend',passport.authenticate('jwt', { session: false }),validate,UsersController.isFriend)
 
 
 export default router
