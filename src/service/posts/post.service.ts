@@ -1,6 +1,7 @@
 import ImagesService from '@/service/images/images.service';
 import { Request, Response } from "express"
 import { Types } from "mongoose";
+import UsersService from '../users/users.service';
 import PostModel from "./post.schema";
 
 export default class PostsService {
@@ -71,6 +72,49 @@ export default class PostsService {
             message:"success",
             payload: {
                 pageSize,
+                totalPages,
+                posts
+            }
+        })
+    }
+
+    static async getFriendsPosts(req:Request,res:Response) {
+        const { userId, page = 1, pageSize = 10 } = req.query
+        const pageSizeNumber = +pageSize
+        if(!userId || !Types.ObjectId.isValid(userId as string)) {
+            res.status(400).json({
+                message:"error",
+                payload: {
+                    errorMessage:"Пользователь не найден!"
+                }
+            })
+            return
+        }
+
+        const friendsIds = await UsersService.getFriendsById(userId as string)
+
+        const filterObject = {
+            author: {
+                $in:friendsIds
+            }
+        }
+
+        const totalPosts = await PostModel.countDocuments(filterObject).exec()
+
+        const totalPages = Math.ceil(totalPosts/pageSizeNumber)
+
+        const skip = (Number(page) - 1) * pageSizeNumber < 0 ? totalPages * pageSizeNumber : (Number(page) - 1) * pageSizeNumber
+            
+
+        const limit = pageSizeNumber
+
+        const posts = await PostModel.find(filterObject).sort({createdAt: 'desc'}).populate({path:"author",select:["_id","avatar","firstName","surname"]}).limit(limit).skip(skip).exec()
+        
+
+        res.status(200).json({
+            message:"success",
+            payload: {
+                page,
                 totalPages,
                 posts
             }

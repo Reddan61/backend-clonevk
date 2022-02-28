@@ -495,6 +495,18 @@ export default class UsersService {
     }
 
     
+    static async getFriendsById(userId:string) {
+        const user = await UserModel.findById(userId).exec()
+        const friends = await UserModel.find({
+            _id: {
+                $in:user.friends
+            },
+            friends:user._id
+        }).distinct("_id").exec()
+        
+        return friends
+    }
+
 
     static async sendEmailToUser(email:string,code:string) {
        return sendEmail({
