@@ -47,6 +47,25 @@ const userSchema = new Schema({
     friends: {
         type: [Schema.Types.ObjectId], 
         ref: 'User'
+    },
+    notifications: {
+        type: [
+            {
+                userId: {
+                    type:Schema.Types.ObjectId,
+                    ref: 'User'
+                },
+                isReaded: {
+                    type:Boolean,
+                    default:false
+                },
+                type:{
+                    type:String,
+                    default:"friend"
+                }
+            }
+        ],
+        default: []
     }
 })
 

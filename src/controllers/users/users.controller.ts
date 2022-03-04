@@ -9,8 +9,14 @@ export default class UsersController {
     static getFriends(req:Request,res:Response) {
         return errorHandler(req,res,UsersService.getFriends.bind(UsersService))
     }
-    static addToFriend(req:Request,res:Response) {
-        return errorHandler(req,res,UsersService.addToFriend.bind(UsersService))
+    static getNotifications(req:Request,res:Response) {
+        return errorHandler(req,res,UsersService.getNotifications.bind(UsersService))
+    }
+    static sendFriendInvite(req:Request,res:Response) {
+        return errorHandler(req,res,UsersService.sendFriendInvite.bind(UsersService))
+    }
+    static acceptFriendInvite(req:Request,res:Response) {
+        return errorHandler(req,res,UsersService.acceptFriendInvite.bind(UsersService))
     }
     static isFriend(req:Request,res:Response) {
         return errorHandler(req,res,UsersService.isFriend.bind(UsersService))
