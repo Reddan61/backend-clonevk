@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const passport_1 = __importDefault(require("passport"));
+const register_1 = require("./validators/register");
+const login_1 = __importDefault(require("./validators/login"));
+const verify_1 = require("./validators/verify");
+const validate_1 = __importDefault(require("../utils/validate"));
+const auth_controller_1 = __importDefault(require("../controllers/auth/auth.controller"));
+const router = express_1.default.Router();
+router.patch('/setpassword', register_1.setPassword, validate_1.default, auth_controller_1.default.firstPassword);
+router.post('/preRegister', register_1.preRegister, validate_1.default, auth_controller_1.default.preRegister);
+router.patch('/send', verify_1.sendEmail, validate_1.default, auth_controller_1.default.sendEmail);
+router.patch('/verify', verify_1.verify, validate_1.default, auth_controller_1.default.verify);
+router.post('/login', login_1.default, validate_1.default, passport_1.default.authenticate('local', { session: false }), auth_controller_1.default.login);
+router.post('/me', passport_1.default.authenticate('jwt', { session: false }), auth_controller_1.default.me);
+exports.default = router;
