@@ -286,117 +286,9 @@ export default class UsersService {
             }
         })
     }
-
-    static async sendFriendInvite(req:Request,res:Response) {
-        const userId = req.user
-        const body = req.body
-  
-        if(String(userId) === String(body.userId)) {
-            res.status(400).json({
-                message:"error",
-                payload: {
-                    errorMessage:"Нельзя добавить себя в друзья!"
-                }
-            })
-            return
-        }
-
-        if(!mongoose.Types.ObjectId.isValid(body.userId)) {
-            res.status(400).json({
-                message:"error",
-                payload: {
-                    errorMessage:"Пользователь не найден!"
-                }
-            })
-            return
-        }
-
-        const user = await UserModel.findById(userId).exec()
-        const friend = await UserModel.findById(body.userId).exec()
-
-        if(!friend) {
-            res.status(400).json({
-                message:"error",
-                payload: {
-                    errorMessage:"Пользователь не найден!"
-                }
-            })
-            return
-        }
-        
-        await friend.updateOne({
-            $pull: {
-                "notifications": {
-                    userId:user._id
-                }
-            }
-        })
-        await friend.updateOne({
-            $push: {
-                "notifications": {
-                    userId:user._id
-                }
-            }
-        })
-
-        
-        res.status(200).json({
-            message:"success",
-            payload: {
-                isFriend:true
-            }
-        })
-    }
-    static async acceptFriendInvite(req:Request,res:Response) {
-        const userId = req.user
-        const body = req.body
-
-        if(!mongoose.Types.ObjectId.isValid(body.notificationId)) {
-            res.status(400).json({
-                message:"error",
-                payload: {
-                    errorMessage:"Уведомление не найдено!"
-                }
-            })
-            return
-        }
-
-        
-        
-        const user = await UserModel.findById(userId).exec()
-        const notifications = await UserModel.find({_id:userId}).distinct("notifications", {
-            "notifications._id":body.notificationId
-        })
-
-        if(!notifications.length) {
-            res.status(400).json({
-                message:"error",
-                payload: {
-                    errorMessage:"Уведомление не найдено!"
-                }
-            })
-            return
-        }
-
-        const friend = await UserModel.findById(notifications[0].userId).exec()
-
-        if(!friend) {
-            res.status(400).json({
-                message:"error",
-                payload: {
-                    errorMessage:"Пользователь не найден!"
-                }
-            })
-            return
-        }
-
-        await user.updateOne({
-            $pull: {
-                "notifications": {
-                    _id:body.notificationId
-                }
-            }
-        })
+    static async addToFriendByIds(userId:string,friendId:string) {
+        const user = await this.getUserById(userId)
+        const friend = await this.getUserById(friendId)
 
         await user.updateOne({
             $pull: {
@@ -419,63 +311,8 @@ export default class UsersService {
                 friends: user._id
             }
         })
-
-        res.status(200).json({
-            message:"success",
-            payload: {
-                isFriend:true
-            }
-        })
     }
-
-    static async getNotifications(req:Request,res:Response) {
-        const userId = req.user
-        const { pageSize = 10, page = 1 } = req.query
-
-        if(!mongoose.Types.ObjectId.isValid(userId as any)) {
-            res.status(400).json({
-                message:"error",
-                payload: {
-                    errorMessage:"Пользователь не найден!"
-                }
-            })
-            return
-        }
-
-        const user = await UserModel.findById(userId).populate({
-            path:"notifications.userId",
-            select:["avatar","surname","firstName"]
-        }).exec()
-
-        if(!user) {
-            res.status(400).json({
-                message:"error",
-                payload: {
-                    errorMessage:"Пользователь не найден!"
-                }
-            })
-            return
-        }
-
-        const pageSizeNumber = Number(pageSize)
-
-        const totalNotifications = user.notifications.length
-
-        const totalPages = Math.ceil(totalNotifications/pageSizeNumber)
-
-        const skip = (Number(page) - 1) * pageSizeNumber < 0 ? totalPages * pageSizeNumber : (Number(page) - 1) * pageSizeNumber
-            
-        const limit = pageSizeNumber
-
-        res.status(200).json({
-            message:"success",
-            payload: {
-                notifications:user.notifications.slice(skip,limit),
-                totalPages,
-                page
-            }
-        })
-    }
+    
 
 
     static async deleteFriend(req:Request,res:Response) {
