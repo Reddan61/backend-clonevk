@@ -54,7 +54,9 @@ export default class UsersService {
             return
         }
 
-        if(await this.getUserByEmail(body.email)) {
+        const foundUserByEmail = await this.getUserByEmail(body.email)
+
+        if(foundUserByEmail && foundUserByEmail.isConfirmed && foundUserByEmail.password.length) {
             res.status(400).json({
                 message:"error",
                 payload: {
@@ -64,6 +66,7 @@ export default class UsersService {
             return
         }
 
+        await UserModel.findByIdAndDelete(foundUserByEmail._id)
         
         const generatedCode = String(Math.floor(Math.random() * ( 10000 - 1000) + 1000))
         

@@ -12,7 +12,8 @@ const userSchema = new Schema({
     },
     password:{
         required:false,
-        type:String
+        type:String,
+        default:""
     },
     email:{
         required:false,
