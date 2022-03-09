@@ -96,6 +96,8 @@ export default class NotificationsService {
 
 
         await UsersService.addToFriendByIds(notifications[0].user,notifications[0].author)
+        await notifications[0].deleteOne()
+
 
         res.status(200).json({
             message:"success",
