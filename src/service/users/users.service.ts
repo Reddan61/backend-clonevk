@@ -65,8 +65,10 @@ export default class UsersService {
             })
             return
         }
-
-        await UserModel.findByIdAndDelete(foundUserByEmail._id)
+        
+        if(foundUserByEmail) {
+            await UserModel.findByIdAndDelete(foundUserByEmail._id)
+        }
         
         const generatedCode = String(Math.floor(Math.random() * ( 10000 - 1000) + 1000))
         
